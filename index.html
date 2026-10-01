@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Ledger</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E💰%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ================= SIGN IN ================= -->
+<div class="wrap" id="auth" hidden>
+  <div class="authbox card">
+    <h1>Ledger</h1>
+    <p>Sign in to see your money tabs. New here? Create an account with the same form.</p>
+    <div class="row"><div><label for="email">Email</label><input id="email" type="email" autocomplete="email"></div></div>
+    <div class="row"><div><label for="pw">Password (8+ characters)</label><input id="pw" type="password" autocomplete="current-password"></div></div>
+    <div class="actions">
+      <button class="btn" id="signin">Sign in</button>
+      <button class="btn alt" id="signup">Create account</button>
+    </div>
+    <p style="margin:14px 0 0"><button class="linkbtn" id="forgot">Forgot your password?</button></p>
+    <div class="status" id="authStatus" role="status"></div>
+  </div>
+</div>
+
+<!-- ================= NEW PASSWORD (after reset email) ================= -->
+<div class="wrap" id="recovery" hidden>
+  <div class="authbox card">
+    <h1>New password</h1>
+    <p>Choose a new password for your account.</p>
+    <div class="row"><div><label for="newpw">New password (8+ characters)</label><input id="newpw" type="password" autocomplete="new-password"></div></div>
+    <div class="actions"><button class="btn" id="savepw">Save password</button></div>
+    <div class="status" id="recStatus" role="status"></div>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div class="wrap" id="app" hidden>
+  <div class="top">
+    <div class="brand">Ledger</div>
+    <div class="right"><span id="who"></span><button class="ghost" id="signout">Sign out</button></div>
+  </div>
+
+  <div class="tabs" role="tablist" id="tabs" aria-label="People"></div>
+
+  <div class="grid">
+    <div class="col">
+      <section class="card" aria-label="Month summary">
+        <div class="month">
+          <button class="sq" id="prev" aria-label="Previous month">‹</button>
+          <b id="monthLabel" class="num"></b>
+          <button class="sq" id="next" aria-label="Next month">›</button>
+        </div>
+        <div class="figures num" id="figures"></div>
+        <div class="bar" id="bar" role="img" aria-label="Where this month's money went"></div>
+        <div class="barcap"><span id="barL"></span><span id="barR"></span></div>
+        <ul class="cats num" id="cats"></ul>
+      </section>
+
+      <section class="card trend">
+        <h2>Last 6 months</h2>
+        <div id="trend"></div>
+        <div class="legend"><span><i style="background:var(--gain)"></i>Earned</span><span><i style="background:var(--spend)"></i>Spent</span></div>
+      </section>
+
+      <section class="card">
+        <h2>Let the AI do the work</h2>
+        <p class="sub">It reads this tab's numbers and tells you what is happening and what to change.</p>
+        <div class="actions" style="margin-top:0">
+          <button class="btn" id="analyze">Analyze this month</button>
+          <button class="btn alt" id="plan">Build my budget plan</button>
+        </div>
+        <div class="row" style="margin:14px 0 0;grid-template-columns:1fr auto">
+          <div><label for="ask">Ask anything about this tab</label><input id="ask" maxlength="500" placeholder="Can I afford a 600 laptop this month?"></div>
+          <div style="align-self:end"><button class="btn alt" id="askgo">Ask</button></div>
+        </div>
+        <div class="status" id="aiStatus" role="status"></div>
+        <div class="ai" id="aiOut" hidden></div>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="card" id="addCard">
+        <h2 id="addTitle">Add money in or out</h2>
+        <form id="addForm" autocomplete="off">
+          <div class="seg" role="group" aria-label="Type">
+            <button type="button" id="tExp" aria-pressed="true">Spent</button>
+            <button type="button" id="tInc" aria-pressed="false">Earned</button>
+          </div>
+          <div class="row">
+            <div><label for="amt">Amount</label><input id="amt" type="number" inputmode="decimal" min="0.01" step="0.01" required></div>
+            <div><label for="cat">Category</label><select id="cat"></select></div>
+          </div>
+          <div class="row">
+            <div><label for="note">What was it?</label><input id="note" maxlength="120" placeholder="Groceries, salary, bus pass"></div>
+            <div><label for="date">Date</label><input id="date" type="date" required></div>
+          </div>
+          <div class="actions" style="margin-top:0">
+            <button class="btn" type="submit" id="submitBtn">Save entry</button>
+            <button class="btn alt" type="button" id="cancelEdit" hidden>Cancel</button>
+          </div>
+        </form>
+        <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
+        <label for="nl">Or just type it, in your own words</label>
+        <textarea id="nl" maxlength="2000" placeholder="Got paid 900 today, spent 45 on groceries yesterday, 12 on a taxi, 60 on electricity"></textarea>
+        <div class="actions"><button class="btn alt" id="nlgo">Add with AI</button></div>
+        <div class="status" id="nlStatus" role="status"></div>
+      </section>
+
+      <section class="card">
+        <h2>This month's entries</h2>
+        <div class="status" id="entStatus" role="status"></div>
+        <ul class="entries num" id="entries"></ul>
+      </section>
+
+      <section class="card">
+        <details>
+          <summary>Tab settings</summary>
+          <div id="ownerSettings">
+            <div class="row">
+              <div><label for="pname">Tab name</label><input id="pname" maxlength="40"></div>
+              <div><label for="goal">Monthly savings goal</label><input id="goal" type="number" min="0" step="1" inputmode="decimal"></div>
+            </div>
+            <div class="row">
+              <div><label for="cur">Currency code</label><input id="cur" maxlength="3" style="text-transform:uppercase" placeholder="USD, EUR, TND"></div>
+            </div>
+          </div>
+          <p class="hint" id="roleNote"></p>
+          <div class="actions">
+            <button class="btn alt" id="csv">Download as CSV</button>
+            <button class="btn warn" id="del">Delete this tab</button>
+          </div>
+          <div id="shareBox" style="margin-top:20px">
+            <h3 style="font-size:16px;margin-bottom:8px">Share this tab</h3>
+            <p class="hint" style="margin:0 0 8px">The other person must already have a Ledger account.</p>
+            <div class="row" style="grid-template-columns:1fr auto">
+              <div><label for="shEmail">Their account email</label><input id="shEmail" type="email"></div>
+              <div><label for="shRole">Can</label>
+                <select id="shRole"><option value="editor">Add and edit</option><option value="viewer">Only view</option></select></div>
+            </div>
+            <button class="btn alt" id="share">Share</button>
+            <ul class="members" id="members"></ul>
+          </div>
+          <div class="status" id="setStatus" role="status"></div>
+        </details>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
